@@ -1,0 +1,55 @@
+{
+	"name": "CFG_EDWDB",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "Source",
+				"type": "varchar"
+			},
+			{
+				"name": "Source_Table",
+				"type": "varchar"
+			},
+			{
+				"name": "Dest_Table",
+				"type": "varchar"
+			},
+			{
+				"name": "Columns",
+				"type": "varchar"
+			},
+			{
+				"name": "Watermark_Column",
+				"type": "varchar"
+			},
+			{
+				"name": "Watermark_Value",
+				"type": "varchar"
+			},
+			{
+				"name": "Enabled",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Load_flag",
+				"type": "varchar"
+			},
+			{
+				"name": "Status",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "cfg"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

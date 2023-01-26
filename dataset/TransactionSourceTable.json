@@ -1,0 +1,17 @@
+{
+	"name": "TransactionSourceTable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "OnPremiseDB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "PostgreSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "public",
+			"table": "transactions"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

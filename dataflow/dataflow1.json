@@ -1,0 +1,78 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "StagingFolder",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "CFG_EDWDB",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     sourcetable as string,",
+				"     watermark_field as string",
+				"}",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false,",
+				"     wildcardPaths:[($sourcetable)]) ~> source1",
+				"source1 aggregate(max_Created_Modified_Date = iif(toString($sourcetable) == 'Customer.csv', max(toTimestamp(toString(byName($watermark_field)), 'dd-MM-yyyy HH:mm')), max(toTimestamp(byName($watermark_field), 'dd-MM-yyyy')))) ~> aggregate1",
+				"aggregate1 derive(TableName = $sourcetable) ~> derivedColumn1",
+				"derivedColumn1 alterRow(updateIf(isNull(max_Created_Modified_Date)==false())) ~> alterRow1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Source as string,",
+				"          Source_Table as string,",
+				"          Dest_Table as string,",
+				"          Columns as string,",
+				"          Watermark_Column as string,",
+				"          Watermark_Value as string,",
+				"          Enabled as integer,",
+				"          Load_flag as string,",
+				"          Status as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['Dest_Table'],",
+				"     skipKeyWrites:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          Dest_Table = TableName,",
+				"          Watermark_Value = max_Created_Modified_Date",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

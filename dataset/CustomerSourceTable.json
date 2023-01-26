@@ -1,0 +1,17 @@
+{
+	"name": "CustomerSourceTable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "OnPremiseDB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "PostgreSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "public",
+			"table": "customer"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,88 @@
+{
+	"name": "Store",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "STG_Transactions",
+						"type": "DatasetReference"
+					},
+					"name": "STGDataLake"
+				},
+				{
+					"dataset": {
+						"referenceName": "DimStore",
+						"type": "DatasetReference"
+					},
+					"name": "dimstore"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DimStore",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "Exists1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          transaction_id as string,",
+				"          cust_id as string,",
+				"          tran_date as string,",
+				"          prod_subcat_code as string,",
+				"          prod_cat_code as string,",
+				"          qty as string,",
+				"          rate as string,",
+				"          tax as string,",
+				"          total_amt as string,",
+				"          store_type as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> STGDataLake",
+				"source(output(",
+				"          Store_Key as integer,",
+				"          Store_Type as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> dimstore",
+				"STGDataLake aggregate(groupBy(store_type),",
+				"     count = count(transaction_id)) ~> aggregate1",
+				"aggregate1, dimstore exists(aggregate1@store_type == dimstore@Store_Type,",
+				"     negate:true,",
+				"     broadcast: 'auto')~> Exists1",
+				"Exists1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Store_Key as integer,",
+				"          Store_Type as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          Store_Type = store_type",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

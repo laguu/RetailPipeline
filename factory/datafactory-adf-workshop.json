@@ -1,0 +1,9 @@
+{
+	"name": "datafactory-adf-workshop",
+	"location": "northeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "90dfd102-225f-4cc9-ba87-de7edbeef630",
+		"tenantId": "9e6c7ad9-da99-4c51-b48a-73726b263a41"
+	}
+}

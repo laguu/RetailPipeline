@@ -1,0 +1,218 @@
+{
+	"name": "Fact Transaction",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "STG_Transactions",
+						"type": "DatasetReference"
+					},
+					"name": "STGTransaction"
+				},
+				{
+					"dataset": {
+						"referenceName": "DimCustomer",
+						"type": "DatasetReference"
+					},
+					"name": "dimcustomer"
+				},
+				{
+					"dataset": {
+						"referenceName": "DimStore",
+						"type": "DatasetReference"
+					},
+					"name": "dimstore"
+				},
+				{
+					"dataset": {
+						"referenceName": "DimProdCatSubCat",
+						"type": "DatasetReference"
+					},
+					"name": "dimprodcatsubcat"
+				},
+				{
+					"dataset": {
+						"referenceName": "DimDate",
+						"type": "DatasetReference"
+					},
+					"name": "dimdate"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "FactTransaction",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "JoinDimCustomer"
+				},
+				{
+					"name": "JoinDimProdCat"
+				},
+				{
+					"name": "JoinDimDate"
+				},
+				{
+					"name": "JoinDimStore"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          transaction_id as string,",
+				"          cust_id as integer,",
+				"          tran_date as date,",
+				"          prod_subcat_code as string,",
+				"          prod_cat_code as string,",
+				"          qty as string,",
+				"          rate as string,",
+				"          tax as string,",
+				"          total_amt as string,",
+				"          store_type as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false) ~> STGTransaction",
+				"source(output(",
+				"          customer_key as integer,",
+				"          customer_Id as integer,",
+				"          customer_name as string,",
+				"          DOB as string,",
+				"          city_code as string,",
+				"          gender as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> dimcustomer",
+				"source(output(",
+				"          Store_Key as integer,",
+				"          Store_Type as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> dimstore",
+				"source(output(",
+				"          Prod_Cat_SubCat_Key as integer,",
+				"          Product_Cat_Code as integer,",
+				"          Product_Category as string,",
+				"          Product_SubCat_Code as integer,",
+				"          Product_SubCategory as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> dimprodcatsubcat",
+				"source(output(",
+				"          DateKey as integer,",
+				"          Date as date,",
+				"          FullDateUK as string,",
+				"          FullDateUSA as string,",
+				"          DayOfMonth as string,",
+				"          DaySuffix as string,",
+				"          DayName as string,",
+				"          DayOfWeekUSA as string,",
+				"          DayOfWeekUK as string,",
+				"          DayOfWeekInMonth as string,",
+				"          DayOfWeekInYear as string,",
+				"          DayOfQuarter as string,",
+				"          DayOfYear as string,",
+				"          WeekOfMonth as string,",
+				"          WeekOfQuarter as string,",
+				"          WeekOfYear as string,",
+				"          Month as string,",
+				"          MonthName as string,",
+				"          MonthOfQuarter as string,",
+				"          Quarter as string,",
+				"          QuarterName as string,",
+				"          Year as string,",
+				"          YearName as string,",
+				"          MonthYear as string,",
+				"          MMYYYY as string,",
+				"          FirstDayOfMonth as date,",
+				"          LastDayOfMonth as date,",
+				"          FirstDayOfQuarter as date,",
+				"          LastDayOfQuarter as date,",
+				"          FirstDayOfYear as date,",
+				"          LastDayOfYear as date,",
+				"          IsHolidayUSA as boolean,",
+				"          IsWeekday as boolean,",
+				"          HolidayUSA as string,",
+				"          IsHolidayUK as boolean,",
+				"          HolidayUK as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> dimdate",
+				"STGTransaction, dimcustomer join(cust_id == customer_Id,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> JoinDimCustomer",
+				"JoinDimCustomer, dimprodcatsubcat join(toInteger(prod_cat_code) == Product_Cat_Code",
+				"     && toInteger(prod_subcat_code) == Product_SubCat_Code,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> JoinDimProdCat",
+				"JoinDimProdCat, dimdate join(tran_date == Date,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> JoinDimDate",
+				"JoinDimDate, dimstore join(STGTransaction@store_type == dimstore@Store_Type,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> JoinDimStore",
+				"JoinDimStore derive(quantity_int = toInteger(qty),",
+				"          rate_float = toFloat(rate),",
+				"          tax_float = toFloat(tax),",
+				"          total_amt_float = toFloat(total_amt)) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Fact_Tran_Key as integer,",
+				"          customer_key as integer,",
+				"          Prod_Cat_SubCat_Key as integer,",
+				"          Store_Key as integer,",
+				"          tran_date as integer,",
+				"          Quantity as integer,",
+				"          rate as double,",
+				"          tax as double,",
+				"          total_amount as double",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          customer_key,",
+				"          Prod_Cat_SubCat_Key,",
+				"          Store_Key,",
+				"          tran_date = DateKey,",
+				"          Quantity = quantity_int,",
+				"          rate = rate_float,",
+				"          tax = tax_float,",
+				"          total_amount = total_amt_float",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

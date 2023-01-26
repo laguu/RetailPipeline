@@ -1,0 +1,16 @@
+{
+	"name": "OnPremiseDB",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "PostgreSql",
+		"typeProperties": {
+			"connectionString": "host=localhost;port=5432;database=OnPremiseDB;uid=postgres;encryptionmethod=0",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIzYzk1NTk3Mi0zZDU0LTQ1MWQtYmNmNS1mOWIyNjY0OTE4OGQiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "SelfHosted-IR",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

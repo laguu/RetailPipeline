@@ -1,0 +1,103 @@
+{
+	"name": "Master pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute STG Pipeline",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "IncrementalDataLoad",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute Dim Customer",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute STG Pipeline",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "DimCustomer SCD Type I",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute DimProductCat",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Dim Customer",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "DimProdCat",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute Dim Store",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute DimProductCat",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "DimStore",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute Fact",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Dim Store",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Fact Transactions",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-01-26T16:41:03Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
