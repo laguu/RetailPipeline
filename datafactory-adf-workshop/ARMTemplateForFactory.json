@@ -1,0 +1,2528 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "datafactory-adf-workshop"
+		},
+		"AzureDataLakeStorage2_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage2'"
+		},
+		"AzureSqlDatabase1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase1'"
+		},
+		"FileServer1_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'FileServer1'"
+		},
+		"MySql1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MySql1'"
+		},
+		"OnPremiseDB_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'OnPremiseDB'"
+		},
+		"AzureDataLakeStorage2_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adfworkshop2022lagu.dfs.core.windows.net/"
+		},
+		"FileServer1_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\LAGUU-DESKTOP\\Project"
+		},
+		"FileServer1_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "koskelaa"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/DimCustomer SCD Type I')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "dataflow2",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflow2",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"STGDataLake": {},
+									"DimCustomer": {},
+									"sink1": {},
+									"sink2": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-01-26T10:30:22Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflow2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DimProdCat')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "dataflow2_copy1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflow2_copy1",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"STGDataLake": {},
+									"DimProdCatSubCat": {},
+									"sink2": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-01-26T11:56:15Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflow2_copy1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DimStore')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Store",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"STGDataLake": {},
+									"dimstore": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-01-26T13:28:44Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/Store')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Fact Transactions')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Fact Transaction",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Fact Transaction",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"STGTransaction": {},
+									"dimcustomer": {},
+									"dimstore": {},
+									"dimprodcatsubcat": {},
+									"dimdate": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-01-26T14:15:42Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/Fact Transaction')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FullLoad')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "PostgreSqlSource"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "CustomerSourceTable",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "StagingFolder",
+								"type": "DatasetReference",
+								"parameters": {
+									"STGfilename": "Customer.csv"
+								}
+							}
+						]
+					},
+					{
+						"name": "Copy data1_copy1",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Copy data1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "PostgreSqlSource"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "TransactionSourceTable",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "StagingFolder",
+								"type": "DatasetReference",
+								"parameters": {
+									"STGfilename": "Transactions.csv"
+								}
+							}
+						]
+					},
+					{
+						"name": "Copy data1_copy2",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Copy data1_copy1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ProductSubcategoryCSV",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "StagingFolder",
+								"type": "DatasetReference",
+								"parameters": {
+									"STGfilename": "Product_Category_Subcategory.csv"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-12-01T13:03:44Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/CustomerSourceTable')]",
+				"[concat(variables('factoryId'), '/datasets/StagingFolder')]",
+				"[concat(variables('factoryId'), '/datasets/TransactionSourceTable')]",
+				"[concat(variables('factoryId'), '/datasets/ProductSubcategoryCSV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/IncrementalDataLoad')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup CFG",
+						"description": "",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "select * from dbo.cfg\nwhere enabled = 1",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "CFG_EDWDB",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Filter_SQLVM_Tables",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "Lookup CFG",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup CFG').output.value",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@equals(item().Source,'SQLVM')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Filter_SQLVM_Tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Filter_SQLVM_Tables').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "If Condition1",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@bool(equals(item().Load_Flag,'Incremental'))",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "Copy data1",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "PostgreSqlSource",
+														"query": {
+															"value": "select * from @{item().Source_Table}",
+															"type": "Expression"
+														}
+													},
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "AzureBlobFSWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": true,
+															"fileExtension": ".txt"
+														}
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
+												},
+												"inputs": [
+													{
+														"referenceName": "CustomerSourceTable",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "StagingFolder",
+														"type": "DatasetReference",
+														"parameters": {
+															"STGfilename": "{item().Dest_Table}"
+														}
+													}
+												]
+											}
+										],
+										"ifTrueActivities": [
+											{
+												"name": "Get Max Last UpdateDate CFG",
+												"type": "Lookup",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "select watermark_value\nfrom cfg\nwhere source_Table like '@{item().Source_Table}'",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
+													},
+													"dataset": {
+														"referenceName": "CFG_EDWDB",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												}
+											},
+											{
+												"name": "Copy to staging",
+												"description": "",
+												"type": "Copy",
+												"dependsOn": [
+													{
+														"activity": "Get Max Last UpdateDate CFG",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "PostgreSqlSource",
+														"query": {
+															"value": "SELECT \n* \nFROM @{item().Source_Table}\nWHERE @{item().Watermark_Column}::timestamp >\n\t'@{activity('Get Max Last UpdateDate CFG').output.firstRow.watermark_value}'::timestamp\n\n",
+															"type": "Expression"
+														}
+													},
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "AzureBlobFSWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": true,
+															"fileExtension": ".txt"
+														}
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
+												},
+												"inputs": [
+													{
+														"referenceName": "CustomerSourceTable",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "StagingFolder",
+														"type": "DatasetReference",
+														"parameters": {
+															"STGfilename": "@{item().Dest_Table}"
+														}
+													}
+												]
+											},
+											{
+												"name": "Data flow1",
+												"type": "ExecuteDataFlow",
+												"dependsOn": [
+													{
+														"activity": "Copy to staging",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"dataflow": {
+														"referenceName": "dataflow1",
+														"type": "DataFlowReference",
+														"parameters": {
+															"sourcetable": {
+																"value": "'@{item().Dest_Table}'",
+																"type": "Expression"
+															},
+															"watermark_field": {
+																"value": "'@{item().Watermark_Column}'",
+																"type": "Expression"
+															}
+														},
+														"datasetParameters": {
+															"source1": {
+																"STGfilename": "@{item().Dest_Table}"
+															},
+															"sink1": {}
+														}
+													},
+													"staging": {},
+													"compute": {
+														"coreCount": 8,
+														"computeType": "General"
+													},
+													"traceLevel": "Fine"
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "ForEach1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "update cfg \nset status = 'Succeeded'\nwhere Dest_Table = '@item().Dest_Table}'\n\nselect 1",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "CFG_EDWDB",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "Filter_Files",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "Lookup CFG",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup CFG').output.value",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@equals(item().source, 'FileSystem')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Copy Product Category file",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Filter_Files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ProductSubcategoryCSV",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "StagingFolder",
+								"type": "DatasetReference",
+								"parameters": {
+									"STGfilename": "Product_Category_Subcategory.csv"
+								}
+							}
+						]
+					},
+					{
+						"name": "Update cfg status",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Copy Product Category file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "update cfg\nset status = 'Succeeded'\nwhere Dest_Table = 'Product_Category_Subcategory.Csv'\n\nselect 1",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "CFG_EDWDB",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-01-03T10:07:59Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/CFG_EDWDB')]",
+				"[concat(variables('factoryId'), '/datasets/ProductSubcategoryCSV')]",
+				"[concat(variables('factoryId'), '/datasets/StagingFolder')]",
+				"[concat(variables('factoryId'), '/datasets/CustomerSourceTable')]",
+				"[concat(variables('factoryId'), '/dataflows/dataflow1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Master pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute STG Pipeline",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "IncrementalDataLoad",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute Dim Customer",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute STG Pipeline",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "DimCustomer SCD Type I",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute DimProductCat",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Dim Customer",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "DimProdCat",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute Dim Store",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute DimProductCat",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "DimStore",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute Fact",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Dim Store",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Fact Transactions",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-01-26T16:41:03Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/IncrementalDataLoad')]",
+				"[concat(variables('factoryId'), '/pipelines/DimCustomer SCD Type I')]",
+				"[concat(variables('factoryId'), '/pipelines/DimProdCat')]",
+				"[concat(variables('factoryId'), '/pipelines/DimStore')]",
+				"[concat(variables('factoryId'), '/pipelines/Fact Transactions')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CFG_EDWDB')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Source",
+						"type": "varchar"
+					},
+					{
+						"name": "Source_Table",
+						"type": "varchar"
+					},
+					{
+						"name": "Dest_Table",
+						"type": "varchar"
+					},
+					{
+						"name": "Columns",
+						"type": "varchar"
+					},
+					{
+						"name": "Watermark_Column",
+						"type": "varchar"
+					},
+					{
+						"name": "Watermark_Value",
+						"type": "varchar"
+					},
+					{
+						"name": "Enabled",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Load_flag",
+						"type": "varchar"
+					},
+					{
+						"name": "Status",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "cfg"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CustomerCSVDataLake')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Customer.csv",
+						"fileSystem": "staging"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "customer_id",
+						"type": "String"
+					},
+					{
+						"name": "dob",
+						"type": "String"
+					},
+					{
+						"name": "gender",
+						"type": "String"
+					},
+					{
+						"name": "city_code",
+						"type": "String"
+					},
+					{
+						"name": "customer_name",
+						"type": "String"
+					},
+					{
+						"name": "created_modified_date",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CustomerSourceTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPremiseDB",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "PostgreSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "public",
+					"table": "customer"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/OnPremiseDB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DimCustomer')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "customer_key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "customer_Id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "customer_name",
+						"type": "varchar"
+					},
+					{
+						"name": "DOB",
+						"type": "varchar"
+					},
+					{
+						"name": "city_code",
+						"type": "varchar"
+					},
+					{
+						"name": "gender",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "dim_customer"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DimDate')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "DateKey",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Date",
+						"type": "date"
+					},
+					{
+						"name": "FullDateUK",
+						"type": "char"
+					},
+					{
+						"name": "FullDateUSA",
+						"type": "char"
+					},
+					{
+						"name": "DayOfMonth",
+						"type": "varchar"
+					},
+					{
+						"name": "DaySuffix",
+						"type": "varchar"
+					},
+					{
+						"name": "DayName",
+						"type": "varchar"
+					},
+					{
+						"name": "DayOfWeekUSA",
+						"type": "char"
+					},
+					{
+						"name": "DayOfWeekUK",
+						"type": "char"
+					},
+					{
+						"name": "DayOfWeekInMonth",
+						"type": "varchar"
+					},
+					{
+						"name": "DayOfWeekInYear",
+						"type": "varchar"
+					},
+					{
+						"name": "DayOfQuarter",
+						"type": "varchar"
+					},
+					{
+						"name": "DayOfYear",
+						"type": "varchar"
+					},
+					{
+						"name": "WeekOfMonth",
+						"type": "varchar"
+					},
+					{
+						"name": "WeekOfQuarter",
+						"type": "varchar"
+					},
+					{
+						"name": "WeekOfYear",
+						"type": "varchar"
+					},
+					{
+						"name": "Month",
+						"type": "varchar"
+					},
+					{
+						"name": "MonthName",
+						"type": "varchar"
+					},
+					{
+						"name": "MonthOfQuarter",
+						"type": "varchar"
+					},
+					{
+						"name": "Quarter",
+						"type": "char"
+					},
+					{
+						"name": "QuarterName",
+						"type": "varchar"
+					},
+					{
+						"name": "Year",
+						"type": "char"
+					},
+					{
+						"name": "YearName",
+						"type": "char"
+					},
+					{
+						"name": "MonthYear",
+						"type": "char"
+					},
+					{
+						"name": "MMYYYY",
+						"type": "char"
+					},
+					{
+						"name": "FirstDayOfMonth",
+						"type": "date"
+					},
+					{
+						"name": "LastDayOfMonth",
+						"type": "date"
+					},
+					{
+						"name": "FirstDayOfQuarter",
+						"type": "date"
+					},
+					{
+						"name": "LastDayOfQuarter",
+						"type": "date"
+					},
+					{
+						"name": "FirstDayOfYear",
+						"type": "date"
+					},
+					{
+						"name": "LastDayOfYear",
+						"type": "date"
+					},
+					{
+						"name": "IsHolidayUSA",
+						"type": "bit"
+					},
+					{
+						"name": "IsWeekday",
+						"type": "bit"
+					},
+					{
+						"name": "HolidayUSA",
+						"type": "varchar"
+					},
+					{
+						"name": "IsHolidayUK",
+						"type": "bit"
+					},
+					{
+						"name": "HolidayUK",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "DimDate"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DimProdCatSubCat')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Prod_Cat_SubCat_Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Product_Cat_Code",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Product_Category",
+						"type": "varchar"
+					},
+					{
+						"name": "Product_SubCat_Code",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Product_SubCategory",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Dim_product_Cat_SubCat"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DimStore')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Store_Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Store_Type",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Dim_Store"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FactTransaction')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Fact_Tran_Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "customer_key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Prod_Cat_SubCat_Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Store_Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "tran_date",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Quantity",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "rate",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "tax",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "total_amount",
+						"type": "float",
+						"precision": 15
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Fact_Transactions"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ProdCatSubCatCSVDataLake')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Product_Category_Subcategory.csv",
+						"fileSystem": "staging"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "prod_cat_code",
+						"type": "String"
+					},
+					{
+						"name": "prod_cat",
+						"type": "String"
+					},
+					{
+						"name": "prod_sub_cat_code",
+						"type": "String"
+					},
+					{
+						"name": "prod_subcat",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ProductSubcategoryCSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "005 Product-Category-Subcategory.csv",
+						"fileSystem": "misc"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "prod_cat_code",
+						"type": "String"
+					},
+					{
+						"name": "prod_cat",
+						"type": "String"
+					},
+					{
+						"name": "prod_sub_cat_code",
+						"type": "String"
+					},
+					{
+						"name": "prod_subcat",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/STG_Transactions')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Transactions.csv",
+						"fileSystem": "staging"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "transaction_id",
+						"type": "String"
+					},
+					{
+						"name": "cust_id",
+						"type": "String"
+					},
+					{
+						"name": "tran_date",
+						"type": "String"
+					},
+					{
+						"name": "prod_subcat_code",
+						"type": "String"
+					},
+					{
+						"name": "prod_cat_code",
+						"type": "String"
+					},
+					{
+						"name": "qty",
+						"type": "String"
+					},
+					{
+						"name": "rate",
+						"type": "String"
+					},
+					{
+						"name": "tax",
+						"type": "String"
+					},
+					{
+						"name": "total_amt",
+						"type": "String"
+					},
+					{
+						"name": "store_type",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/StagingFolder')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage2",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"STGfilename": {
+						"type": "string",
+						"defaultValue": "demo"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().STGfilename",
+							"type": "Expression"
+						},
+						"fileSystem": "staging"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TransactionSourceTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPremiseDB",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "PostgreSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "public",
+					"table": "transactions"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/OnPremiseDB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDataLakeStorage2')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('AzureDataLakeStorage2_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDataLakeStorage2_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabase1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureSqlDatabase1_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FileServer1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('FileServer1_properties_typeProperties_host')]",
+					"userId": "[parameters('FileServer1_properties_typeProperties_userId')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('FileServer1_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "SelfHosted-IR",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHosted-IR')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MySql1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "MySql",
+				"typeProperties": {
+					"connectionString": "[parameters('MySql1_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OnPremiseDB')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "PostgreSql",
+				"typeProperties": {
+					"connectionString": "[parameters('OnPremiseDB_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "SelfHosted-IR",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/SelfHosted-IR')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Daily Retail Data Load')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Master pipeline",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2023-01-26T16:39:00Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Master pipeline')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SelfHosted-IR')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Fact Transaction')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "STG_Transactions",
+								"type": "DatasetReference"
+							},
+							"name": "STGTransaction"
+						},
+						{
+							"dataset": {
+								"referenceName": "DimCustomer",
+								"type": "DatasetReference"
+							},
+							"name": "dimcustomer"
+						},
+						{
+							"dataset": {
+								"referenceName": "DimStore",
+								"type": "DatasetReference"
+							},
+							"name": "dimstore"
+						},
+						{
+							"dataset": {
+								"referenceName": "DimProdCatSubCat",
+								"type": "DatasetReference"
+							},
+							"name": "dimprodcatsubcat"
+						},
+						{
+							"dataset": {
+								"referenceName": "DimDate",
+								"type": "DatasetReference"
+							},
+							"name": "dimdate"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "FactTransaction",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "JoinDimCustomer"
+						},
+						{
+							"name": "JoinDimProdCat"
+						},
+						{
+							"name": "JoinDimDate"
+						},
+						{
+							"name": "JoinDimStore"
+						},
+						{
+							"name": "derivedColumn1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          transaction_id as string,",
+						"          cust_id as integer,",
+						"          tran_date as date,",
+						"          prod_subcat_code as string,",
+						"          prod_cat_code as string,",
+						"          qty as string,",
+						"          rate as string,",
+						"          tax as string,",
+						"          total_amt as string,",
+						"          store_type as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     inferDriftedColumnTypes: true,",
+						"     ignoreNoFilesFound: false) ~> STGTransaction",
+						"source(output(",
+						"          customer_key as integer,",
+						"          customer_Id as integer,",
+						"          customer_name as string,",
+						"          DOB as string,",
+						"          city_code as string,",
+						"          gender as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> dimcustomer",
+						"source(output(",
+						"          Store_Key as integer,",
+						"          Store_Type as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> dimstore",
+						"source(output(",
+						"          Prod_Cat_SubCat_Key as integer,",
+						"          Product_Cat_Code as integer,",
+						"          Product_Category as string,",
+						"          Product_SubCat_Code as integer,",
+						"          Product_SubCategory as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> dimprodcatsubcat",
+						"source(output(",
+						"          DateKey as integer,",
+						"          Date as date,",
+						"          FullDateUK as string,",
+						"          FullDateUSA as string,",
+						"          DayOfMonth as string,",
+						"          DaySuffix as string,",
+						"          DayName as string,",
+						"          DayOfWeekUSA as string,",
+						"          DayOfWeekUK as string,",
+						"          DayOfWeekInMonth as string,",
+						"          DayOfWeekInYear as string,",
+						"          DayOfQuarter as string,",
+						"          DayOfYear as string,",
+						"          WeekOfMonth as string,",
+						"          WeekOfQuarter as string,",
+						"          WeekOfYear as string,",
+						"          Month as string,",
+						"          MonthName as string,",
+						"          MonthOfQuarter as string,",
+						"          Quarter as string,",
+						"          QuarterName as string,",
+						"          Year as string,",
+						"          YearName as string,",
+						"          MonthYear as string,",
+						"          MMYYYY as string,",
+						"          FirstDayOfMonth as date,",
+						"          LastDayOfMonth as date,",
+						"          FirstDayOfQuarter as date,",
+						"          LastDayOfQuarter as date,",
+						"          FirstDayOfYear as date,",
+						"          LastDayOfYear as date,",
+						"          IsHolidayUSA as boolean,",
+						"          IsWeekday as boolean,",
+						"          HolidayUSA as string,",
+						"          IsHolidayUK as boolean,",
+						"          HolidayUK as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> dimdate",
+						"STGTransaction, dimcustomer join(cust_id == customer_Id,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> JoinDimCustomer",
+						"JoinDimCustomer, dimprodcatsubcat join(toInteger(prod_cat_code) == Product_Cat_Code",
+						"     && toInteger(prod_subcat_code) == Product_SubCat_Code,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> JoinDimProdCat",
+						"JoinDimProdCat, dimdate join(tran_date == Date,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> JoinDimDate",
+						"JoinDimDate, dimstore join(STGTransaction@store_type == dimstore@Store_Type,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> JoinDimStore",
+						"JoinDimStore derive(quantity_int = toInteger(qty),",
+						"          rate_float = toFloat(rate),",
+						"          tax_float = toFloat(tax),",
+						"          total_amt_float = toFloat(total_amt)) ~> derivedColumn1",
+						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          Fact_Tran_Key as integer,",
+						"          customer_key as integer,",
+						"          Prod_Cat_SubCat_Key as integer,",
+						"          Store_Key as integer,",
+						"          tran_date as integer,",
+						"          Quantity as integer,",
+						"          rate as double,",
+						"          tax as double,",
+						"          total_amount as double",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          customer_key,",
+						"          Prod_Cat_SubCat_Key,",
+						"          Store_Key,",
+						"          tran_date = DateKey,",
+						"          Quantity = quantity_int,",
+						"          rate = rate_float,",
+						"          tax = tax_float,",
+						"          total_amount = total_amt_float",
+						"     )) ~> sink1"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/STG_Transactions')]",
+				"[concat(variables('factoryId'), '/datasets/DimCustomer')]",
+				"[concat(variables('factoryId'), '/datasets/DimStore')]",
+				"[concat(variables('factoryId'), '/datasets/DimProdCatSubCat')]",
+				"[concat(variables('factoryId'), '/datasets/DimDate')]",
+				"[concat(variables('factoryId'), '/datasets/FactTransaction')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Store')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "STG_Transactions",
+								"type": "DatasetReference"
+							},
+							"name": "STGDataLake"
+						},
+						{
+							"dataset": {
+								"referenceName": "DimStore",
+								"type": "DatasetReference"
+							},
+							"name": "dimstore"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DimStore",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "aggregate1"
+						},
+						{
+							"name": "Exists1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          transaction_id as string,",
+						"          cust_id as string,",
+						"          tran_date as string,",
+						"          prod_subcat_code as string,",
+						"          prod_cat_code as string,",
+						"          qty as string,",
+						"          rate as string,",
+						"          tax as string,",
+						"          total_amt as string,",
+						"          store_type as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> STGDataLake",
+						"source(output(",
+						"          Store_Key as integer,",
+						"          Store_Type as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> dimstore",
+						"STGDataLake aggregate(groupBy(store_type),",
+						"     count = count(transaction_id)) ~> aggregate1",
+						"aggregate1, dimstore exists(aggregate1@store_type == dimstore@Store_Type,",
+						"     negate:true,",
+						"     broadcast: 'auto')~> Exists1",
+						"Exists1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          Store_Key as integer,",
+						"          Store_Type as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          Store_Type = store_type",
+						"     )) ~> sink1"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/STG_Transactions')]",
+				"[concat(variables('factoryId'), '/datasets/DimStore')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "StagingFolder",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "CFG_EDWDB",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "aggregate1"
+						},
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "alterRow1"
+						}
+					],
+					"scriptLines": [
+						"parameters{",
+						"     sourcetable as string,",
+						"     watermark_field as string",
+						"}",
+						"source(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     inferDriftedColumnTypes: true,",
+						"     ignoreNoFilesFound: false,",
+						"     wildcardPaths:[($sourcetable)]) ~> source1",
+						"source1 aggregate(max_Created_Modified_Date = iif(toString($sourcetable) == 'Customer.csv', max(toTimestamp(toString(byName($watermark_field)), 'dd-MM-yyyy HH:mm')), max(toTimestamp(byName($watermark_field), 'dd-MM-yyyy')))) ~> aggregate1",
+						"aggregate1 derive(TableName = $sourcetable) ~> derivedColumn1",
+						"derivedColumn1 alterRow(updateIf(isNull(max_Created_Modified_Date)==false())) ~> alterRow1",
+						"alterRow1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          Source as string,",
+						"          Source_Table as string,",
+						"          Dest_Table as string,",
+						"          Columns as string,",
+						"          Watermark_Column as string,",
+						"          Watermark_Value as string,",
+						"          Enabled as integer,",
+						"          Load_flag as string,",
+						"          Status as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:true,",
+						"     upsertable:false,",
+						"     keys:['Dest_Table'],",
+						"     skipKeyWrites:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          Dest_Table = TableName,",
+						"          Watermark_Value = max_Created_Modified_Date",
+						"     )) ~> sink1"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/StagingFolder')]",
+				"[concat(variables('factoryId'), '/datasets/CFG_EDWDB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow2')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "CustomerCSVDataLake",
+								"type": "DatasetReference"
+							},
+							"name": "STGDataLake"
+						},
+						{
+							"dataset": {
+								"referenceName": "DimCustomer",
+								"type": "DatasetReference"
+							},
+							"name": "DimCustomer"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DimCustomer",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						},
+						{
+							"dataset": {
+								"referenceName": "DimCustomer",
+								"type": "DatasetReference"
+							},
+							"name": "sink2"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Exists2"
+						},
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "exists1"
+						},
+						{
+							"name": "derivedColumn2"
+						},
+						{
+							"name": "alterRow1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          customer_id as string,",
+						"          dob as string,",
+						"          gender as string,",
+						"          city_code as string,",
+						"          customer_name as string,",
+						"          created_modified_date as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> STGDataLake",
+						"source(output(",
+						"          customer_key as integer,",
+						"          customer_Id as integer,",
+						"          customer_name as string,",
+						"          DOB as string,",
+						"          city_code as string,",
+						"          gender as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> DimCustomer",
+						"STGDataLake, DimCustomer exists(toInteger(STGDataLake@customer_id) == DimCustomer@customer_Id,",
+						"     negate:true,",
+						"     broadcast: 'auto')~> Exists2",
+						"Exists2 derive(customerid = toInteger(customer_id)) ~> derivedColumn1",
+						"STGDataLake, DimCustomer exists(toInteger(STGDataLake@customer_id) == DimCustomer@customer_Id,",
+						"     negate:false,",
+						"     broadcast: 'auto')~> exists1",
+						"exists1 derive(customerid_int = toInteger(customer_id)) ~> derivedColumn2",
+						"derivedColumn2 alterRow(updateIf(true())) ~> alterRow1",
+						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          customer_key as integer,",
+						"          customer_Id as integer,",
+						"          customer_name as string,",
+						"          DOB as string,",
+						"          city_code as string,",
+						"          gender as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          customer_Id = customerid,",
+						"          customer_name,",
+						"          DOB = dob,",
+						"          city_code,",
+						"          gender",
+						"     )) ~> sink1",
+						"alterRow1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          customer_key as integer,",
+						"          customer_Id as integer,",
+						"          customer_name as string,",
+						"          DOB as string,",
+						"          city_code as string,",
+						"          gender as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:false,",
+						"     updateable:true,",
+						"     upsertable:false,",
+						"     keys:['customer_Id'],",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          customer_Id = customerid_int,",
+						"          customer_name,",
+						"          DOB = dob,",
+						"          city_code,",
+						"          gender",
+						"     )) ~> sink2"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/CustomerCSVDataLake')]",
+				"[concat(variables('factoryId'), '/datasets/DimCustomer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow2_copy1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ProdCatSubCatCSVDataLake",
+								"type": "DatasetReference"
+							},
+							"name": "STGDataLake"
+						},
+						{
+							"dataset": {
+								"referenceName": "DimProdCatSubCat",
+								"type": "DatasetReference"
+							},
+							"name": "DimProdCatSubCat"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DimProdCatSubCat",
+								"type": "DatasetReference"
+							},
+							"name": "sink2"
+						}
+					],
+					"transformations": [
+						{
+							"name": "exists1"
+						},
+						{
+							"name": "derivedColumn2"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          prod_cat_code as string,",
+						"          prod_cat as string,",
+						"          prod_sub_cat_code as string,",
+						"          prod_subcat as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> STGDataLake",
+						"source(output(",
+						"          Prod_Cat_SubCat_Key as integer,",
+						"          Product_Cat_Code as integer,",
+						"          Product_Category as string,",
+						"          Product_SubCat_Code as integer,",
+						"          Product_SubCategory as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> DimProdCatSubCat",
+						"STGDataLake, DimProdCatSubCat exists(toInteger(prod_cat_code) == Product_Cat_Code",
+						"     && toInteger(prod_sub_cat_code) == Product_SubCat_Code,",
+						"     negate:true,",
+						"     broadcast: 'auto')~> exists1",
+						"exists1 derive(cat_code = toInteger(prod_cat_code),",
+						"          subcat_code = toInteger(prod_sub_cat_code)) ~> derivedColumn2",
+						"derivedColumn2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          Prod_Cat_SubCat_Key as integer,",
+						"          Product_Cat_Code as integer,",
+						"          Product_Category as string,",
+						"          Product_SubCat_Code as integer,",
+						"          Product_SubCategory as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          Product_Cat_Code = cat_code,",
+						"          Product_Category = prod_cat,",
+						"          Product_SubCat_Code = subcat_code,",
+						"          Product_SubCategory = prod_subcat",
+						"     )) ~> sink2"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ProdCatSubCatCSVDataLake')]",
+				"[concat(variables('factoryId'), '/datasets/DimProdCatSubCat')]"
+			]
+		}
+	]
+}
