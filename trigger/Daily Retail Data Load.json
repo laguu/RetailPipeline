@@ -2,7 +2,7 @@
 	"name": "Daily Retail Data Load",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
